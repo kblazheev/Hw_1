@@ -9,7 +9,7 @@ connection = sql.connect(db)
 cursor = connection.cursor()
 tab_okved = '''
 CREATE TABLE IF NOT EXISTS okved(
-    id int primary key,
+    id integer primary key,
     code text,
     parent_code text,
     section text,

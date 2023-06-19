@@ -7,6 +7,7 @@ connection = sql.connect(db)
 cursor = connection.cursor()
 tab_create = '''
 CREATE TABLE IF NOT EXISTS telecom_companies(
+    id integer primary key,
     name text,
     inn text,
     ogrn text,
@@ -30,15 +31,7 @@ with zipfile.ZipFile('egrul.json.zip', 'r') as zip:
                     okved = row['data']['СвОКВЭД']['СвОКВЭДОсн']['КодОКВЭД']
                     if okved[:2] == '61':
                         data.append([row['name'], row['inn'], row['ogrn'], ogrn_date, okved])
-                        continue
-                if 'СвОКВЭДДоп' in row['data']['СвОКВЭД'].keys():
-                    for item in row['data']['СвОКВЭД']['СвОКВЭДДоп']:
-                        if not isinstance(item, str):
-                            okved = item['КодОКВЭД']
-                            if okved[:2] == '61':
-                                data.append([row['name'], row['inn'], row['ogrn'], ogrn_date, okved])
-                                break                    
-        os.remove(file)     
+        os.remove(file)   
 insert_val = "INSERT INTO telecom_companies(name, inn, ogrn, ogrn_date, okved) VALUES(?, ?, ?, ?, ?);"
 cursor.executemany(insert_val, data)
 connection.commit()
