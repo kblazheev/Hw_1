@@ -3,19 +3,28 @@ import pandas as pd
 import sqlite3 as sql
 import os
 db = 'hw1.db'
-connection = sql.connect(db)
-cursor = connection.cursor()
-tab_create = '''
-CREATE TABLE IF NOT EXISTS telecom_companies(
-    id integer primary key,
-    name text,
-    inn text,
-    ogrn text,
-    ogrn_date date,
-    okved text
-);'''
-cursor.execute(tab_create)
-connection.commit()
+try:
+    connection = sql.connect(db)
+    cursor = connection.cursor()
+    print(f"База данных {db} подключена к SQLite")
+    tab_create = '''
+    CREATE TABLE IF NOT EXISTS telecom_companies(
+        id integer primary key,
+        name text,
+        inn text,
+        ogrn text,
+        ogrn_date date,
+        okved text
+    );'''
+    cursor.execute(tab_create)
+    connection.commit()
+    print(f"Таблица {tab_create}\n успешно добавлена в БД")
+except sql.Error as error:
+    print(f"Не удалось добавить таблицу")
+    print("Исключение: ", error.__class__, error.args)
+    if (connection):
+        connection.close()
+        print("Соединение с SQLite закрыто")
 data = []
 with zipfile.ZipFile('egrul.json.zip', 'r') as zip:
     files = zip.namelist()
@@ -31,9 +40,17 @@ with zipfile.ZipFile('egrul.json.zip', 'r') as zip:
                     okved = row['data']['СвОКВЭД']['СвОКВЭДОсн']['КодОКВЭД']
                     if okved[:2] == '61':
                         data.append([row['name'], row['inn'], row['ogrn'], ogrn_date, okved])
-        os.remove(file)   
-insert_val = "INSERT INTO telecom_companies(name, inn, ogrn, ogrn_date, okved) VALUES(?, ?, ?, ?, ?);"
-cursor.executemany(insert_val, data)
-connection.commit()
-cursor.close()
-connection.close()
+        os.remove(file)
+    insert_val = "INSERT INTO telecom_companies(name, inn, ogrn, ogrn_date, okved) VALUES(?, ?, ?, ?, ?);"
+try:
+    cursor.executemany(insert_val, data)
+    connection.commit()
+    print(f"Данные успешно добавлены в таблицу")
+    cursor.close()
+except sql.Error as error:
+    print(f"Не удалось вставить данные в таблицу")
+    print("Исключение: ", error.__class__, error.args)
+finally:
+    if (connection):
+        connection.close()
+        print("Соединение с SQLite закрыто")
