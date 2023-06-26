@@ -9,9 +9,9 @@ with zipfile.ZipFile(okved_archive, 'r') as zip:
 okved_df = pd.read_json(okved_file)
 
 try:
-    connection = sql.connect(db_name)
+    connection = sql.connect(db)
     cursor = connection.cursor()
-    print(f"База данных {db_name} подключена к SQLite")
+    print(f"База данных {db} подключена к SQLite")
     tab_okved = '''
     CREATE TABLE IF NOT EXISTS okved(
         id integer primary key,

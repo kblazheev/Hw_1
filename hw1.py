@@ -4,9 +4,9 @@ import sqlite3 as sql
 from constants import *
 
 try:
-    connection = sql.connect(db_telecom)
+    connection = sql.connect(db)
     cursor = connection.cursor()
-    print(f"База данных {db_telecom} подключена к SQLite")
+    print(f"База данных {db} подключена к SQLite")
     tab_create = '''
     CREATE TABLE IF NOT EXISTS telecom_companies(
         id integer primary key,
