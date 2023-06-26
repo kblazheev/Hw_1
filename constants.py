@@ -1,0 +1,5 @@
+okved_archive = 'okved_2.json.zip'
+okved_file = 'okved_2.json'
+db_okved = 'hw.db'
+egrul_archive = 'egrul.json.zip'
+db_telecom = 'hw1.db'

@@ -1,14 +1,17 @@
 import zipfile
 import pandas as pd
 import sqlite3 as sql
-with zipfile.ZipFile('okved_2.json.zip', 'r') as zip:
-    zip.extract('okved_2.json')
-okved_df = pd.read_json('okved_2.json')
-db = 'hw.db'
+from constants import *
+
+print(okved_archive)
+with zipfile.ZipFile(okved_archive, 'r') as zip:
+    zip.extract(okved_file)
+okved_df = pd.read_json(okved_file)
+
 try:
-    connection = sql.connect(db)
+    connection = sql.connect(db_name)
     cursor = connection.cursor()
-    print(f"База данных {db} подключена к SQLite")
+    print(f"База данных {db_name} подключена к SQLite")
     tab_okved = '''
     CREATE TABLE IF NOT EXISTS okved(
         id integer primary key,
