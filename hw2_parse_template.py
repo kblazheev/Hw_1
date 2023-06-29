@@ -54,5 +54,5 @@ try:
                 print("Соединение с SQLite закрыто")
     else:
         print(f'Не удалось загрузить данные поиска: {search_result.status_code}')
-except:
-    print("Исключение: ", OSError.__class__, OSError.args)
+except Exception:
+    print("Исключение: ", Exception.__class__, Exception.args)

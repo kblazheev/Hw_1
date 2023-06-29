@@ -1,8 +1,33 @@
 import requests
 from bs4 import BeautifulSoup
 import sqlite3 as sql
+import asyncio
 import time
+from aiohttp import ClientSession
 from constants import *
+
+async def get_vacancy(url, session):
+    async with session.get(url=url) as vacancy_page:
+        vacancy_json = await vacancy_page.json()
+        return vacancy_json
+        
+async def main(items):
+    async with ClientSession('https://api.hh.ru/') as session:
+        tasks = []
+        for item in items:
+            url = f"/{item['url'][18:]}"
+            tasks.append(asyncio.create_task(get_vacancy(url, session)))
+        vacancies_json = await asyncio.gather(*tasks)
+    for vacancy in vacancies_json:
+        description = ''
+        key_skills = ''
+        if (vacancy['description'] != None):
+            description = BeautifulSoup(vacancy['description'], 'lxml').get_text()
+        if (vacancy['key_skills'] != None):
+            for skill in vacancy['key_skills']:
+                key_skills += skill['name'] + ', '
+            key_skills = key_skills[:-2]
+        data.append([vacancy['employer']['name'], vacancy['name'], description, key_skills])
 
 try:
     search_result = requests.get(url)
@@ -10,19 +35,7 @@ try:
         vacancy_list = search_result.json().get('items')
         data = []
         start = time.time()
-        for item in vacancy_list:
-            vacancy_page = requests.get(item['url'])
-            if vacancy_page.status_code == 200:
-                vacancy = vacancy_page.json()
-                description = ''
-                key_skills = ''
-                if (vacancy['description'] != None):
-                    description = BeautifulSoup(vacancy['description'], 'lxml').get_text()
-                if (vacancy['key_skills'] != None):
-                    for skill in vacancy['key_skills']:
-                        key_skills += skill['name'] + ', '
-                    key_skills = key_skills[:-2]
-                data.append([vacancy['employer']['name'], vacancy['name'], description, key_skills])
+        asyncio.run(main(vacancy_list))
         print("Время выполнения, с: ", time.time() - start)
         try:
             connection = sql.connect(db)
