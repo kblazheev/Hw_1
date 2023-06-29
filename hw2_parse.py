@@ -8,10 +8,27 @@ try:
     search_result = requests.get(url2, headers=user_agent)
     if search_result.status_code == 200:
         soup = bs(search_result.content, 'lxml')
+        links = soup.find_all('a', attrs={'data-qa': 'serp-item__title'})
+        data = []
+        for link in links:
+            vacancy_page = requests.get(link.attrs.get('href'), headers=user_agent)
+            if vacancy_page.status_code == 200:
+                content = bs(vacancy_page.content, 'lxml')
+                company = content.find('a', attrs={'data-qa': 'vacancy-company-name'}).get_text()
+                name = content.find('h1', attrs={'data-qa': 'vacancy-title'}).get_text()
+                description = ''
+                vd = content.find('div', attrs={'data-qa': 'vacancy-description'})
+                if vd is not None:
+                    description = vd.get_text()
+                key_skills_containers = content.find_all('span', attrs={'data-qa': 'bloko-tag__text'})
+                key_skills =''
+                for skill in key_skills_containers:
+                    key_skills += skill.text + ', '
+                key_skills = key_skills[:-2]
+                data.append([company, name, description, key_skills])
         result = soup.find('template').text
         links = json.loads(result)
-        data = []
-        for link in links['vacancySearchResult']['vacancies']:
+        for link in links['vacancySearchResult']['vacancies']:   
             vacancy_page = requests.get(link['links']['desktop'], headers=user_agent)
             if vacancy_page.status_code == 200:
                 content = bs(vacancy_page.content, 'lxml')
