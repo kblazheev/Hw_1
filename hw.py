@@ -9,13 +9,11 @@ from pathlib import Path
 config = Path('logger.conf').absolute()
 logging.config.fileConfig(fname=config, disable_existing_loggers=False)
 logger = logging.getLogger('hwLogger')
-
 try:
     with zipfile.ZipFile(okved_archive, 'r') as zip:
         with zip.open(okved_file) as file:
             okved_df = pd.read_json(file)
     logger.info(f"Данные ОКВЭД успешно загружены из архива {egrul_archive}")
-
     try:
         connection = sql.connect(db)
         cursor = connection.cursor()
@@ -37,5 +35,5 @@ try:
         if (connection):
             connection.close()
             logger.info("Соединение с SQLite закрыто")
-except:
+except Exception:
     logger.critical(f"Ошибка чтения архива {egrul_archive}")

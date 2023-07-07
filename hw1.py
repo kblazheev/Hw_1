@@ -9,7 +9,6 @@ from pathlib import Path
 config = Path('logger.conf').absolute()
 logging.config.fileConfig(fname=config, disable_existing_loggers=False)
 logger = logging.getLogger('hwLogger')
-
 try:
     connection = sql.connect(db)
     cursor = connection.cursor()
