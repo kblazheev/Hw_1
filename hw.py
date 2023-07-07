@@ -1,41 +1,41 @@
+from constants import *
 import zipfile
 import pandas as pd
 import sqlite3 as sql
-from constants import *
+import logging
+import logging.config
+from pathlib import Path
 
-print(okved_archive)
-with zipfile.ZipFile(okved_archive, 'r') as zip:
-    zip.extract(okved_file)
-okved_df = pd.read_json(okved_file)
+config = Path('logger.conf').absolute()
+logging.config.fileConfig(fname=config, disable_existing_loggers=False)
+logger = logging.getLogger('hwLogger')
 
 try:
-    connection = sql.connect(db)
-    cursor = connection.cursor()
-    print(f"База данных {db} подключена к SQLite")
-    tab_okved = '''
-    CREATE TABLE IF NOT EXISTS okved(
-        id integer primary key,
-        code text,
-        parent_code text,
-        section text,
-        name text,
-        comment text
-    );'''
-    cursor.execute(tab_okved)
-    connection.commit()
-    print(f"Таблица {tab_okved}\n успешно добавлена в БД")
-    insert_val = "INSERT INTO okved(code, parent_code, section, name, comment) VALUES(?, ?, ?, ?, ?);"
-    data = []
-    for index, row in okved_df.iterrows():
-        data.append(row)
-    cursor.executemany(insert_val, data)
-    connection.commit()
-    print("Данные успешно добавлены в таблицу")
-    cursor.close()
-except sql.Error as error:
-    print("Не удалось вставить данные в таблицу")
-    print("Исключение: ", error.__class__, error.args)
-finally:
-    if (connection):
-        connection.close()
-        print("Соединение с SQLite закрыто")
+    with zipfile.ZipFile(okved_archive, 'r') as zip:
+        with zip.open(okved_file) as file:
+            okved_df = pd.read_json(file)
+    logger.info(f"Данные ОКВЭД успешно загружены из архива {egrul_archive}")
+
+    try:
+        connection = sql.connect(db)
+        cursor = connection.cursor()
+        logger.info(f"База данных {db} подключена к SQLite")
+        cursor.execute(tab_okved)
+        connection.commit()
+        logger.info("Таблица okved успешно добавлена в БД")
+        data = []
+        for index, row in okved_df.iterrows():
+            data.append(row)
+        cursor.executemany(insert_okved, data)
+        connection.commit()
+        logger.info("Данные успешно добавлены в таблицу okved")
+        cursor.close()
+    except sql.Error as error:
+        logger.error("Не удалось вставить данные в таблицу okved")
+        logger.error(f"Исключение: {error.__class__}, {error.args}")
+    finally:
+        if (connection):
+            connection.close()
+            logger.info("Соединение с SQLite закрыто")
+except:
+    logger.critical(f"Ошибка чтения архива {egrul_archive}")
