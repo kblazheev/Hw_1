@@ -1,9 +1,15 @@
+from constants import *
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs
 import sqlite3 as sql
 import time
-from constants import *
+import logging
+import logging.config
+from pathlib import Path
 
+config = Path('logger.conf').absolute()
+logging.config.fileConfig(fname=config, disable_existing_loggers=False)
+logger = logging.getLogger('hwLogger')
 try:
     search_result = requests.get(url)
     if search_result.status_code == 200:
@@ -17,41 +23,32 @@ try:
                 description = ''
                 key_skills = ''
                 if (vacancy['description'] != None):
-                    description = BeautifulSoup(vacancy['description'], 'lxml').get_text()
+                    description = bs(vacancy['description'], 'lxml').get_text()
                 if (vacancy['key_skills'] != None):
                     for skill in vacancy['key_skills']:
                         key_skills += skill['name'] + ', '
                     key_skills = key_skills[:-2]
                 data.append([vacancy['employer']['name'], vacancy['name'], description, key_skills])
-        print("Время выполнения, с: ", time.time() - start)
+        logger.info(f"Время выполнения, с: {time.time() - start}")
         try:
             connection = sql.connect(db)
             cursor = connection.cursor()
-            print(f"База данных {db} подключена к SQLite")
-            tab_create = '''
-            CREATE TABLE IF NOT EXISTS vacancies(
-                id integer primary key,
-                employer_name text,
-                name text,
-                description text,
-                key_skills text
-            );'''
-            cursor.execute(tab_create)
+            logger.info(f"База данных {db} подключена к SQLite")
+            cursor.execute(tab_vacancies)
             connection.commit()
-            print(f"Таблица {tab_create}\n успешно добавлена в БД")
-            insert_val = "INSERT INTO vacancies(employer_name, name, description, key_skills) VALUES(?, ?, ?, ?);"
-            cursor.executemany(insert_val, data)
+            logger.info('Таблица vacancies успешно добавлена в БД')
+            cursor.executemany(insert_vacancy, data)
             connection.commit()
-            print(f"Данные успешно добавлены в таблицу")
+            logger.info('Данные успешно добавлены в таблицу vacancies')
             cursor.close()
         except sql.Error as error:
-            print(f"Не удалось вставить данные в таблицу")
-            print("Исключение: ", error.__class__, error.args)
+            logger.error('Не удалось вставить данные в таблицу vacancies')
+            logger.error("Исключение: ", error.__class__, error.args)
         finally:
             if (connection):
                 connection.close()
-                print("Соединение с SQLite закрыто")
+                logger.info("Соединение с SQLite закрыто")
     else:
-        print(f'Не удалось загрузить данные поиска: {search_result.status_code}')
+        logger.critical(f"Не удалось загрузить данные поиска: {search_result.status_code}")
 except Exception:
-    print("Исключение: ", Exception.__class__, Exception.args)
+    logger.critical(f"Исключение: {Exception.__class__}, {Exception.args}")
