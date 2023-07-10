@@ -40,6 +40,24 @@ tab_vacancies1 = '''
                 key_skills text
             );'''
 insert_vacancy1 = "INSERT INTO vacancies1(employer_name, name, description, key_skills) VALUES(?, ?, ?, ?);"
+tab_vacancies2 = '''
+            CREATE TABLE IF NOT EXISTS vacancies2(
+                id integer primary key,
+                employer_name text,
+                name text,
+                description text,
+                key_skills text
+            );'''
+insert_vacancy2 = "INSERT INTO vacancies2(employer_name, name, description, key_skills) VALUES(?, ?, ?, ?);"
+tab_vacancies3 = '''
+            CREATE TABLE IF NOT EXISTS vacancies3(
+                id integer primary key,
+                employer_name text,
+                name text,
+                description text,
+                key_skills text
+            );'''
+insert_vacancy3 = "INSERT INTO vacancies3(employer_name, name, description, key_skills) VALUES(?, ?, ?, ?);"
 url = "https://api.hh.ru/vacancies?text=middle+python+developer&area=113&per_page=100&search_field=name"
 url2 = "https://hh.ru/search/vacancy?text=middle+python+developer&area=113&items_on_page=100&search_field=name"
 user_agent = {'User-agent': 'Mozilla/5.0'}
