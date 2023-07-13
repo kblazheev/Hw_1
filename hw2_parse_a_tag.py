@@ -11,7 +11,7 @@ config = Path('logger.conf').absolute()
 logging.config.fileConfig(fname=config, disable_existing_loggers=False)
 logger = logging.getLogger('hwLogger')
 try:
-    search_result = requests.get(url2, headers=user_agent)
+    search_result = requests.get(url2, headers=user_agent, params=url_params)
     if search_result.status_code == 200:
         soup = bs(search_result.content, 'lxml')
         links = soup.find_all('a', attrs={'data-qa': 'serp-item__title'})

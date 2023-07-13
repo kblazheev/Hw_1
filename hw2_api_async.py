@@ -5,6 +5,7 @@ import sqlite3 as sql
 import asyncio
 import time
 from aiohttp import ClientSession as cs
+from aiohttp import TCPConnector as tcpcn
 import logging
 import logging.config
 from pathlib import Path
@@ -19,7 +20,8 @@ async def get_vacancy(url, session):
         return vacancy_json
         
 async def main(items):
-    async with cs('https://api.hh.ru/') as session:
+    connector = tcpcn(limit=10)
+    async with cs(api_url, connector=connector) as session:
         tasks = []
         for item in items:
             url = f"/{item['url'][18:]}"
@@ -37,7 +39,7 @@ async def main(items):
         data.append([vacancy['employer']['name'], vacancy['name'], description, key_skills])
 
 try:
-    search_result = requests.get(url)
+    search_result = requests.get(url, params=url_params)
     if search_result.status_code == 200:
         vacancy_list = search_result.json().get('items')
         data = []

@@ -58,6 +58,13 @@ tab_vacancies3 = '''
                 key_skills text
             );'''
 insert_vacancy3 = "INSERT INTO vacancies3(employer_name, name, description, key_skills) VALUES(?, ?, ?, ?);"
-url = "https://api.hh.ru/vacancies?text=middle+python+developer&area=113&per_page=100&search_field=name"
-url2 = "https://hh.ru/search/vacancy?text=middle+python+developer&area=113&items_on_page=100&search_field=name"
+url = "https://api.hh.ru/vacancies"
+url2 = "https://hh.ru/search/vacancy"
+api_url = "https://api.hh.ru/"
 user_agent = {'User-agent': 'Mozilla/5.0'}
+url_params = {
+    "text": "middle python developer",
+    "search_field": "name",
+    "per_page": "100",
+    "area": "113"
+}

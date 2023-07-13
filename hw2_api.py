@@ -11,7 +11,7 @@ config = Path('logger.conf').absolute()
 logging.config.fileConfig(fname=config, disable_existing_loggers=False)
 logger = logging.getLogger('hwLogger')
 try:
-    search_result = requests.get(url)
+    search_result = requests.get(url, params=url_params)
     if search_result.status_code == 200:
         vacancy_list = search_result.json().get('items')
         data = []
